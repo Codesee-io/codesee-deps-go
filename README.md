@@ -1,5 +1,7 @@
 # codesee-deps-go
 
+[![Version](https://img.shields.io/badge/version-v0.0.0-green.svg)](https://github.com/Codesee-io/codesee-deps-go/releases)
+
 A command line tool that gives you a list of all usages between files within a
 project, while ignoring external dependencies.
 
@@ -65,3 +67,24 @@ go run ./cmd/deps .
 go run ./cmd/deps ./pkg/testdata/simple-repo
 go run /path/to/other/project
 ```
+
+### Releasing
+
+To make a new release, you need to have a GitHub token with `repo` permissions.
+You can generate one [here](https://github.com/settings/tokens/new). Once you
+have it, you just need to run the following command:
+
+```sh
+GITHUB_TOKEN=<github_token> TAG=<new_tag> make release
+# e.g.
+GITHUB_TOKEN=TOKEN TAG=v1.0.0 make release
+```
+
+This does the following:
+
+- Changes the version number in the `README.md`
+- Commits the change with the `TAG` as the commit message
+- Creates a tag with the specified `TAG`
+- Pushes the commit and tag to GitHub
+- Runs `goreleaser` to generate the binaries and uploads them to GitHub as a new
+  release
