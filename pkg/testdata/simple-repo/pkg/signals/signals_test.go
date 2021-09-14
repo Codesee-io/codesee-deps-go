@@ -9,7 +9,7 @@ import (
 )
 
 func TestSetup(t *testing.T) {
-	ch := Setup()
+	ch := SetupSignals()
 
 	err := syscall.Kill(syscall.Getpid(), syscall.SIGINT)
 	require.NoError(t, err)

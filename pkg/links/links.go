@@ -137,6 +137,8 @@ func DetermineLinks(root string) ([]Link, error) {
 				pos := parsedDir.FileSet.Position(file.Pos())
 				filename := Filename(pos.Filename)
 
+				dotImports := []PackagePath{}
+
 				// Go through all the imports in this file.
 				for _, importSpec := range file.Imports {
 					// The path value is wrapped in quotes, so we need to trim
@@ -155,13 +157,6 @@ func DetermineLinks(root string) ([]Link, error) {
 					// In this example, the name would be "c". If there is no
 					// alias, then name is nil.
 					if importSpec.Name == nil {
-						if name, ok := pkgPathToPkgName[PackagePath(importedPkgPath)]; ok {
-							// The imported package path is found in our
-							// mapping, which means this is an internal import,
-							// not an external dependency.
-							pkgNameToPkgPath[name] = PackagePath(importedPkgPath)
-						}
-					} else {
 						// If there isn't a custom package name, then we need to
 						// use the package's assigned name. While this is
 						// usually the final segment in the package path, this
@@ -169,20 +164,48 @@ func DetermineLinks(root string) ([]Link, error) {
 						// mapping from package path to package name that we
 						// generated in the first pass to fill in the default
 						// package name.
-						pkgNameToPkgPath[PackageName(importSpec.Name.String())] = PackagePath(importedPkgPath)
+						if name, ok := pkgPathToPkgName[PackagePath(importedPkgPath)]; ok {
+							// The imported package path is found in our
+							// mapping, which means this is an internal import,
+							// not an external dependency.
+							pkgNameToPkgPath[name] = PackagePath(importedPkgPath)
+						}
+					} else {
+						if importSpec.Name.String() == "." {
+							// If the name is ".", then all of that package's
+							// identifiers are accessible without needing to
+							// qualify it with a package name. Here's an
+							// example:
+							// import (
+							//   . "fmt"
+							// )
+							// With this, we can then use Println and Printf
+							// instead of fmt.Println and fmt.Printf.
+							dotImports = append(dotImports, PackagePath(importedPkgPath))
+						} else {
+							pkgNameToPkgPath[PackageName(importSpec.Name.String())] = PackagePath(importedPkgPath)
+						}
 					}
 				}
 
-				for _, ident := range file.Unresolved {
-					if toFilename, ok := identifierToFilename[pkgPath][Identifier(ident.String())]; ok {
-						setKey := fmt.Sprintf("%s:%s", filename, toFilename)
+				// These are all the packages that we should check for
+				// unresolved identifiers. If an identifier is being used
+				// without a package name, that means it's either defined in its
+				// own package, or it was imported with a ".".
+				packagePathsWithUnqualifiedIdentifiers := append([]PackagePath{pkgPath}, dotImports...)
 
-						if _, ok := linksSet[setKey]; !ok {
-							links = append(links, Link{
-								From: strings.Replace(string(filename), absRoot+"/", "", -1),
-								To:   strings.Replace(string(toFilename), absRoot+"/", "", -1),
-							})
-							linksSet[setKey] = struct{}{}
+				for _, ident := range file.Unresolved {
+					for _, pkgPath := range packagePathsWithUnqualifiedIdentifiers {
+						if toFilename, ok := identifierToFilename[pkgPath][Identifier(ident.String())]; ok {
+							setKey := fmt.Sprintf("%s:%s", filename, toFilename)
+
+							if _, ok := linksSet[setKey]; !ok {
+								links = append(links, Link{
+									From: strings.Replace(string(filename), absRoot+"/", "", -1),
+									To:   strings.Replace(string(toFilename), absRoot+"/", "", -1),
+								})
+								linksSet[setKey] = struct{}{}
+							}
 						}
 					}
 				}
