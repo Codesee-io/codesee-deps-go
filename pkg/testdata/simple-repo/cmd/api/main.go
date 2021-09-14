@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"simple-repo/pkg/server"
-	"simple-repo/pkg/signals"
+	. "simple-repo/pkg/signals"
 )
 
 const port = 2345
@@ -17,7 +17,7 @@ func main() {
 		log.Fatalf("server error: %s\n", err.Error())
 	}
 
-	graceful := signals.Setup()
+	graceful := SetupSignals()
 
 	go func() {
 		log.Printf("server started on port %d\n", port)
