@@ -1,7 +1,6 @@
 package links
 
 import (
-	"sort"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -15,13 +14,6 @@ func TestDetermineLinks(t *testing.T) {
 		links, err := DetermineLinks(root)
 		require.NoError(tt, err)
 
-		// Sort the slice since its order isn't deterministic.
-		sort.Slice(links, func(i, j int) bool {
-			if links[i].From == links[j].From {
-				return links[i].To < links[j].To
-			}
-			return links[i].From < links[j].From
-		})
 		assert.Equal(tt, []Link{
 			{From: "cmd/api/main.go", To: "pkg/server/server.go"},
 			{From: "cmd/api/main.go", To: "pkg/signals/signals.go"},

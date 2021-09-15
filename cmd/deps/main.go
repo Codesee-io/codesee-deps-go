@@ -33,7 +33,7 @@ func main() {
 		errutils.Fatal(err)
 	}
 
-	out, err := json.MarshalIndent(l, "", "  ")
+	out, err := json.Marshal(l)
 	if err != nil {
 		errutils.Fatal(err)
 	}

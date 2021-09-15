@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go/ast"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/Codesee-io/codesee-deps-go/pkg/parser"
@@ -292,6 +293,16 @@ func DetermineLinks(root string) ([]Link, error) {
 			}
 		}
 	}
+
+	// Sort the slice since its order isn't deterministic. While it doesn't need
+	// to be sorted, it helps if it is. And it's probably faster to sort it here
+	// than to do it downstream.
+	sort.Slice(links, func(i, j int) bool {
+		if links[i].From == links[j].From {
+			return links[i].To < links[j].To
+		}
+		return links[i].From < links[j].From
+	})
 
 	return links, nil
 }
