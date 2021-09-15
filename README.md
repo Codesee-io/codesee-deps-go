@@ -1,6 +1,6 @@
 # codesee-deps-go
 
-[![Version](https://img.shields.io/badge/version-v0.2.1-green.svg)](https://github.com/Codesee-io/codesee-deps-go/releases)
+[![Version](https://img.shields.io/badge/version-v0.2.2-green.svg)](https://github.com/Codesee-io/codesee-deps-go/releases)
 
 A command line tool that gives you a list of all usages between files within a
 project, while ignoring external dependencies.
