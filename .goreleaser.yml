@@ -11,10 +11,8 @@ builds:
       - linux
 archives:
   - replacements:
-      darwin: Darwin
-      linux: Linux
-      386: i386
-      amd64: x86_64
+      386: x32
+      amd64: x64
 checksum:
   name_template: 'checksums.txt'
 release:
