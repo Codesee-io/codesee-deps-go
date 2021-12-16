@@ -23,7 +23,7 @@ type stackTracer interface {
 func Fatal(err error) {
 	stack := ErrStack(err)
 	fmt.Println(err.Error())
-	fmt.Println(string(stack))
+	fmt.Fprintln(os.Stderr, string(stack))
 	os.Exit(1)
 }
 
